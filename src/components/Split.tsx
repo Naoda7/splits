@@ -64,7 +64,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
   }, [scale]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (media && media.startsWith("blob:")) {
+    if (media) {
       isDragging.current = true;
       
       // Simpan posisi awal
@@ -217,11 +217,11 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Enter image/YouTube URL"
-            className="flex-1 px-3 py-1.5 text-sm bg-gray-800/10 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm focus:outline-none"
+            className="flex-1 px-3 py-1.5 text-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm focus:outline-none"
           />
           <button
             type="submit"
-            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-full shadow-sm hover:bg-blue-600"
+            className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-full shadow-sm hover:bg-blue-600"
           >
             Load
           </button>
