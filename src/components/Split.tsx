@@ -116,7 +116,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
   return (
     <div
       ref={containerRef}
-      className="relative min-h-[120px] sm:min-h-[200px] h-full w-full group bg-white dark:bg-gray-900 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800"
+      className="relative aspect-square sm:aspect-auto min-h-[120px] sm:min-h-[200px] h-full w-full group bg-white dark:bg-gray-900 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800"
       {...getRootProps()}
     >
       <input {...getInputProps()} />
@@ -130,7 +130,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       {media && (
         <div
           ref={draggableRef}
-          className="h-full w-full transform will-change-transform touch-none"
+          className="h-full w-full transform will-change-transform touch-none flex-1"
           style={{
             transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
             cursor: isDragging.current ? "grabbing" : "grab",
@@ -160,7 +160,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       )}
 
       {!media && (
-        <div className="h-full flex flex-col items-center justify-center p-2 sm:p-4 bg-white dark:bg-gray-900">
+        <div className="h-full flex flex-col items-center justify-center p-1.5 sm:p-4 bg-white dark:bg-gray-900">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -177,15 +177,15 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
             }}
             className="p-2 sm:p-4 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
-            <PhotoIcon className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 dark:text-gray-500" />
+            <PhotoIcon className="h-6 w-6 sm:h-12 sm:w-12 text-gray-400 dark:text-gray-500" />
           </button>
-          <p className="text-xs sm:text-base text-gray-500 dark:text-gray-400 text-center mt-1 sm:mt-2 px-2">
-            {isDragActive ? "Drop image here" : "Click to upload or drag & drop"}
+          <p className="text-[11px] sm:text-base text-gray-500 dark:text-gray-400 text-center mt-1 sm:mt-2 px-2 leading-tight">
+            {isDragActive ? "Drop image here" : "Click to upload\nor drag & drop"}
           </p>
 
           <form
             onSubmit={handleUrlSubmit}
-            className="mt-4 sm:mt-7 w-full max-w-[240px] sm:max-w-md px-2 sm:px-4 flex flex-col sm:flex-row gap-2 opacity-90 text-gray-400"
+            className="mt-3 sm:mt-7 w-full max-w-[240px] sm:max-w-md px-1 sm:px-4 flex flex-col sm:flex-row gap-1 sm:gap-2 opacity-90 text-gray-400"
             onClick={(e) => e.stopPropagation()}
           >
             <input
@@ -193,11 +193,11 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="Enter image/YouTube URL"
-              className="w-full px-3 py-1.5 text-sm bg-gray-400/20 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm focus:outline-none"
+              className="w-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-gray-400/20 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm focus:outline-none"
             />
             <button
               type="submit"
-              className="w-24 self-center sm:w-auto px-3 py-1.5 text-sm bg-gray-400/20 dark:bg-gray-800/80 text-gray-400 rounded-full shadow-sm hover:bg-gray-400 hover:text-white"
+              className="w-20 sm:w-24 self-center px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-gray-400/20 dark:bg-gray-800/80 text-gray-400 rounded-full shadow-sm hover:bg-gray-400 hover:text-white"
             >
               Load
             </button>
@@ -207,20 +207,20 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
 
       {media && (
         <>
-          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-20">
+          <div className="absolute top-0.5 right-0.5 sm:top-2 sm:right-2 z-20">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleRemoveMedia();
               }}
-              className="p-1 sm:p-1.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white dark:hover:bg-gray-700"
+              className="p-1 sm:p-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white dark:hover:bg-gray-700"
               title="Remove media"
             >
               <XMarkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
             </button>
           </div>
 
-          <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 z-20 flex items-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full p-0.5 sm:p-1 shadow-sm space-x-1">
+          <div className="absolute bottom-0.5 right-0.5 sm:bottom-2 sm:right-2 z-20 flex items-center bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-0.5 sm:p-1 shadow-sm space-x-0.5">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -228,9 +228,9 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
               }}
               className="p-0.5 sm:p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
             >
-              <MinusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <MinusIcon className="h-2.5 w-2.5 sm:h-4 sm:w-4" />
             </button>
-            <span className="text-[10px] sm:text-xs px-1 sm:px-2">{(scale * 100).toFixed(0)}%</span>
+            <span className="text-[9px] sm:text-xs px-1 sm:px-2">{(scale * 100).toFixed(0)}%</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -238,7 +238,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
               }}
               className="p-0.5 sm:p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
             >
-              <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <PlusIcon className="h-2.5 w-2.5 sm:h-4 sm:w-4" />
             </button>
           </div>
         </>
