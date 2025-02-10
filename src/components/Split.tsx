@@ -116,7 +116,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full group bg-white dark:bg-gray-900 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800"
+      className="relative h-auto w-full group bg-white dark:bg-gray-900 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800"
       {...getRootProps()}
     >
       <input {...getInputProps()} />
@@ -225,7 +225,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       {!media && (
         <form
           onSubmit={handleUrlSubmit}
-          className="fixed bottom-[20%] md:bottom-72 left-1/2 transform -translate-x-1/2 w-full max-w-md px-14 z-20 flex flex-col md:flex-row gap-2 opacity-90 text-gray-400"
+          className="relative bottom-[30vh] md:bottom-72 left-1/2 transform -translate-x-1/2 w-64 md:w-full max-w-md px-4 md:px-0 sm:px-0 z-20 flex flex-col md:flex-row gap-2 opacity-90 text-gray-400"
           onClick={(e) => e.stopPropagation()}
         >
           <input
@@ -237,7 +237,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
           />
           <button
             type="submit"
-            className="w-28 self-center md:w-auto px-3 py-1.5 text-sm bg-gray-400/20 dark:bg-gray-800/80 text-gray-400 rounded-full shadow-sm hover:bg-gray-400 hover:text-white"
+            className="w-24 self-center md:w-auto px-3 py-1.5 text-sm bg-gray-400/20 dark:bg-gray-800/80 text-gray-400 rounded-full shadow-sm hover:bg-gray-400 hover:text-white"
           >
             Load
           </button>
