@@ -225,7 +225,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       {!media && (
         <form
           onSubmit={handleUrlSubmit}
-          className="fixed bottom-72 md:bottom-72 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-14 z-20 flex gap-2 opacity-90 text-gray-400"
+          className="fixed bottom-60 md:bottom-72 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-14 z-20 flex gap-2 opacity-90 text-gray-400"
           onClick={(e) => e.stopPropagation()}
         >
           <input
