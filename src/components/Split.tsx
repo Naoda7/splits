@@ -14,7 +14,6 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const draggableRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk tracking drag state
   const isDragging = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
   const currentTranslate = useRef({ x: 0, y: 0 });
@@ -32,23 +31,32 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging.current || !draggableRef.current) return;
-
-      // Hitung pergerakan mouse
       const deltaX = e.clientX - startPos.current.x;
       const deltaY = e.clientY - startPos.current.y;
+      draggableRef.current.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scale})`;
+      currentTranslate.current = { x: deltaX, y: deltaY };
+    };
 
-      // Update posisi secara langsung ke DOM
-      draggableRef.current.style.transform = 
-        `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scale})`;
-
-      // Simpan posisi sementara
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging.current || !draggableRef.current) return;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - startPos.current.x;
+      const deltaY = touch.clientY - startPos.current.y;
+      draggableRef.current.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scale})`;
       currentTranslate.current = { x: deltaX, y: deltaY };
     };
 
     const handleMouseUp = () => {
       if (isDragging.current) {
         isDragging.current = false;
-        // Update state dengan posisi terakhir
+        setPosition(currentTranslate.current);
+        document.body.style.cursor = 'auto';
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (isDragging.current) {
+        isDragging.current = false;
         setPosition(currentTranslate.current);
         document.body.style.cursor = 'auto';
       }
@@ -56,24 +64,29 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
   }, [scale]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (media) {
       isDragging.current = true;
       
-      // Simpan posisi awal
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      
       startPos.current = {
-        x: e.clientX - position.x,
-        y: e.clientY - position.y
+        x: clientX - position.x,
+        y: clientY - position.y
       };
       
-      // Update cursor
       document.body.style.cursor = 'grabbing';
     }
   };
@@ -117,12 +130,13 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       {media && (
         <div
           ref={draggableRef}
-          className="h-full w-full transform will-change-transform"
+          className="h-full w-full transform will-change-transform touch-none"
           style={{
             transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
             cursor: isDragging.current ? "grabbing" : "grab",
           }}
-          onMouseDown={handleMouseDown}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
         >
           {media.includes("youtube.com") ? (
             <iframe
@@ -142,6 +156,8 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
           )}
         </div>
       )}
+
+      {!media && (
         <div className="h-full flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-900">
           <button
             onClick={(e) => {
@@ -165,7 +181,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
             {isDragActive ? "Drop image here" : "Click to upload or drag & drop"}
           </p>
         </div>
-      )
+      )}
 
       {media && (
         <>
@@ -209,7 +225,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       {!media && (
         <form
           onSubmit={handleUrlSubmit}
-          className="absolute bottom-2 left-2 right-2 z-20 flex gap-2 opacity-90"
+          className="absolute bottom-40 sm:bottom-20 md:bottom-32 lg:bottom-48 xl:bottom-72 inset-x-0 mx-auto w-full max-w-md px-14 z-20 flex gap-2 opacity-90 text-gray-400"
           onClick={(e) => e.stopPropagation()}
         >
           <input
@@ -217,11 +233,11 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Enter image/YouTube URL"
-            className="flex-1 px-3 py-1.5 text-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm focus:outline-none"
+            className="flex-1 px-3 py-1.5 text-sm bg-gray-400/20 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm focus:outline-none"
           />
           <button
             type="submit"
-            className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-full shadow-sm hover:bg-blue-600"
+            className="px-3 py-1.5 text-sm bg-gray-400/20 dark:bg-gray-800/80 text-gray-400 rounded-full shadow-sm hover:bg-gray-400 hover:text-white"
           >
             Load
           </button>
