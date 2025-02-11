@@ -41,7 +41,7 @@ const App = () => {
 
   // Fungsi untuk mereset split ke kondisi awal
   const resetSplits = () => {
-    setSplits([{ id: uuidv4() }]); // Kembalikan ke 1 split dengan ID baru
+    setSplits([{ id: uuidv4() }]);
   };
 
   // Fungsi untuk toggle dark mode
@@ -93,7 +93,7 @@ const App = () => {
         openColorPicker={() => setShowColorPicker(true)}
         setLayout={setLayout}
         toggleFullscreen={toggleFullscreen}
-        resetSplits={resetSplits} // Tambahkan prop resetSplits
+        resetSplits={resetSplits}
       />
 
       {/* Area Konten */}
