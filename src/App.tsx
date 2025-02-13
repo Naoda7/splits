@@ -44,6 +44,17 @@ const App = () => {
     setSplits([{ id: uuidv4() }]);
   };
 
+  // Fungsi untuk membuat grid layout (2 di atas, 2 di bawah)
+  const createGridLayout = () => {
+    setSplits([
+      { id: uuidv4() }, // Split 1: Atas kiri
+      { id: uuidv4() }, // Split 2: Atas kanan
+      { id: uuidv4() }, // Split 3: Bawah kiri
+      { id: uuidv4() }, // Split 4: Bawah kanan
+    ]);
+    setLayout("grid"); // Set layout ke grid
+  };
+
   // Fungsi untuk toggle dark mode
   const toggleDarkMode = () => {
     setIsDark(!isDark);
@@ -69,7 +80,7 @@ const App = () => {
     if (splits.length === 1) return "flex h-full";
     switch (layout) {
       case "grid":
-        return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+        return "grid grid-cols-2 grid-rows-2 gap-4"; // 2x2 grid layout
       case "rows":
         return "flex flex-col";
       case "columns":
@@ -94,12 +105,13 @@ const App = () => {
         setLayout={setLayout}
         toggleFullscreen={toggleFullscreen}
         resetSplits={resetSplits}
+        createGridLayout={createGridLayout} // Teruskan fungsi ini
       />
 
       {/* Area Konten */}
-      <div className={`content-area flex-1 gap-4 p-4 overflow-auto ${getLayoutClass()}`}>
+      <div className={`content-area flex-1 p-4 overflow-auto ${getLayoutClass()}`}>
         {splits.map((split) => (
-          <Split key={split.id} onRemoveMedia={() => {}} />
+          <Split key={split.id} onRemoveMedia={() => removeSplit()} />
         ))}
       </div>
 

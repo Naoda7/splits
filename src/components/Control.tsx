@@ -21,6 +21,7 @@ interface ControlProps {
   setLayout: (layout: 'grid' | 'rows' | 'columns') => void
   toggleFullscreen: () => void
   resetSplits: () => void
+  createGridLayout: () => void // Tambahkan prop ini
 }
 
 const Control: FC<ControlProps> = ({ 
@@ -31,7 +32,8 @@ const Control: FC<ControlProps> = ({
   openColorPicker,
   setLayout,
   toggleFullscreen,
-  resetSplits
+  resetSplits,
+  createGridLayout // Terima prop ini
 }) => {
   return (
     <nav className="relative flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 shadow-sm">
@@ -65,7 +67,10 @@ const Control: FC<ControlProps> = ({
 
         <div className="flex gap-1 border-l pl-4 border-gray-200 dark:border-gray-800">
           <button
-            onClick={() => setLayout('grid')}
+            onClick={() => {
+              setLayout('grid'); // Tetap memanggil setLayout
+              createGridLayout(); // Panggil fungsi createGridLayout
+            }}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
             title="Grid Layout"
           >
