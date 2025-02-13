@@ -75,6 +75,44 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
     };
   }, [scale]);
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const items = e.clipboardData.items;
+    
+    // Handle pasted image
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const blob = item.getAsFile();
+        if (blob) {
+          setMedia(URL.createObjectURL(blob));
+          setScale(1);
+          setPosition({ x: 0, y: 0 });
+          return;
+        }
+      }
+    }
+    
+    // Handle pasted text/URL
+    const pastedText = e.clipboardData.getData('text/plain');
+    if (pastedText) {
+      setUrl(pastedText);
+      processMediaUrl(pastedText);
+    }
+  };
+
+  const processMediaUrl = (url: string) => {
+    if (!url) return;
+
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      const videoId = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
+      setMedia(`https://www.youtube.com/embed/${videoId}`);
+    } else {
+      setMedia(url);
+    }
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (media) {
       isDragging.current = true;
@@ -93,16 +131,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
 
   const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url) return;
-
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-      const videoId = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
-      setMedia(`https://www.youtube.com/embed/${videoId}`);
-    } else {
-      setMedia(url);
-    }
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
+    processMediaUrl(url);
   };
 
   const handleRemoveMedia = () => {
@@ -192,6 +221,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
+              onPaste={handlePaste}
               placeholder="Enter image/YouTube URL"
               className="w-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-gray-400/20 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm focus:outline-none"
             />
