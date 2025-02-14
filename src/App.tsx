@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Control from "./components/Control";
 import Split from "./components/Split";
@@ -7,12 +7,12 @@ import LastActivityModal from "./components/LastActivityModal";
 
 interface SplitData {
   id: string;
-  media?: string; // Menyimpan URL media (data URL atau YouTube URL)
+  media?: string;
 }
 
 interface ActivityData {
   splits: SplitData[];
-  isDark: boolean; // Menyimpan state dark mode
+  isDark: boolean;
   timestamp: number;
 }
 
@@ -23,6 +23,16 @@ const App = () => {
   const [layout, setLayout] = useState<"grid" | "rows" | "columns">("grid");
   const [showLastActivityModal, setShowLastActivityModal] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
+
+  // Simpan aktivitas ke localStorage (gunakan useCallback untuk memoize fungsi)
+  const saveActivity = useCallback(() => {
+    const activity: ActivityData = {
+      splits,
+      isDark,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem("lastActivity", JSON.stringify(activity));
+  }, [splits, isDark]); // Dependencies: splits dan isDark
 
   // Cek aktivitas terakhir saat komponen dimount
   useEffect(() => {
@@ -37,20 +47,10 @@ const App = () => {
       if (isDataValid && isWithin24Hours) {
         setShowLastActivityModal(true);
       } else {
-        localStorage.removeItem("lastActivity"); // Hapus data invalid
+        localStorage.removeItem("lastActivity");
       }
     }
   }, []);
-
-  // Simpan aktivitas ke localStorage
-  const saveActivity = () => {
-    const activity: ActivityData = {
-      splits,
-      isDark, // Simpan state dark mode
-      timestamp: Date.now(),
-    };
-    localStorage.setItem("lastActivity", JSON.stringify(activity));
-  };
 
   // Pulihkan aktivitas terakhir
   const restoreActivity = () => {
@@ -74,29 +74,29 @@ const App = () => {
 
   // Hapus aktivitas terakhir
   const deleteLastActivity = () => {
-    localStorage.removeItem("lastActivity"); // Hapus data dari localStorage
-    setShowLastActivityModal(false); // Tutup modal
+    localStorage.removeItem("lastActivity");
+    setShowLastActivityModal(false); 
   };
 
   // Fungsi untuk menambah split
   const addSplit = () => {
     const newSplits = [...splits, { id: uuidv4() }];
     setSplits(newSplits);
-    saveActivity(); // Simpan aktivitas
+    saveActivity();
   };
 
   // Fungsi untuk menghapus split
   const removeSplit = () => {
     const newSplits = splits.slice(0, -1);
     setSplits(newSplits);
-    saveActivity(); // Simpan aktivitas
+    saveActivity();
   };
 
   // Fungsi untuk mereset split
   const resetSplits = () => {
     const newSplits = [{ id: uuidv4() }];
     setSplits(newSplits);
-    saveActivity(); // Simpan aktivitas
+    saveActivity();
   };
 
   // Fungsi untuk membuat grid layout
@@ -108,7 +108,7 @@ const App = () => {
       { id: uuidv4() },
     ];
     setSplits(newSplits);
-    saveActivity(); // Simpan aktivitas
+    saveActivity();
     setLayout("grid");
   };
 
@@ -118,7 +118,7 @@ const App = () => {
       split.id === id ? { ...split, media } : split
     );
     setSplits(newSplits);
-    saveActivity(); // Simpan aktivitas
+    saveActivity();
   };
 
   // Fungsi untuk toggle dark mode
@@ -128,15 +128,14 @@ const App = () => {
       document.documentElement.classList.toggle("dark", newIsDark);
       return newIsDark;
     });
-    // Tidak perlu panggil saveActivity() karena sudah di-handle oleh useEffect
   };
 
   // Simpan aktivitas otomatis saat splits atau isDark berubah
   useEffect(() => {
     if (splits.length > 0 || isDark) {
-      saveActivity(); // Hanya simpan jika ada aktivitas
+      saveActivity();
     }
-  }, [splits, isDark]);
+  }, [splits, isDark, saveActivity]);
 
   // Fungsi untuk menentukan class layout
   const getLayoutClass = () => {
