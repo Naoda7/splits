@@ -4,24 +4,36 @@ import { PhotoIcon, XMarkIcon, PlusIcon, MinusIcon } from "@heroicons/react/24/o
 
 interface SplitProps {
   onRemoveMedia: () => void;
+  media?: string;
+  onMediaChange: (media: string) => void;
 }
 
-const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
-  const [media, setMedia] = useState<string | null>(null);
-  const [url, setUrl] = useState("");
+const Split: FC<SplitProps> = ({ onRemoveMedia, media, onMediaChange }) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [url, setUrl] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const draggableRef = useRef<HTMLDivElement>(null);
-  
+
   const isDragging = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
   const currentTranslate = useRef({ x: 0, y: 0 });
 
+  // Fungsi untuk membaca file sebagai Data URL
+  const readFileAsDataURL = (file: File) => {
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [".jpeg", ".png", ".jpg", ".gif"] },
-    onDrop: (files) => {
-      setMedia(URL.createObjectURL(files[0]));
+    onDrop: async (files) => {
+      const file = files[0];
+      const dataUrl = await readFileAsDataURL(file);
+      onMediaChange(dataUrl); // Simpan sebagai Data URL
       setScale(1);
       setPosition({ x: 0, y: 0 });
     },
@@ -50,7 +62,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       if (isDragging.current) {
         isDragging.current = false;
         setPosition(currentTranslate.current);
-        document.body.style.cursor = 'auto';
+        document.body.style.cursor = "auto";
       }
     };
 
@@ -58,7 +70,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
       if (isDragging.current) {
         isDragging.current = false;
         setPosition(currentTranslate.current);
-        document.body.style.cursor = 'auto';
+        document.body.style.cursor = "auto";
       }
     };
 
@@ -75,39 +87,41 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
     };
   }, [scale]);
 
-  const handlePaste = (e: React.ClipboardEvent) => {
+  // Handle paste image sebagai Data URL
+  const handlePaste = async (e: React.ClipboardEvent) => {
     e.preventDefault();
     const items = e.clipboardData.items;
-    
-    // Handle pasted image
+
     for (const item of items) {
-      if (item.type.startsWith('image/')) {
+      if (item.type.startsWith("image/")) {
         const blob = item.getAsFile();
         if (blob) {
-          setMedia(URL.createObjectURL(blob));
+          const dataUrl = await readFileAsDataURL(blob);
+          onMediaChange(dataUrl);
           setScale(1);
           setPosition({ x: 0, y: 0 });
           return;
         }
       }
     }
-    
-    // Handle pasted text/URL
-    const pastedText = e.clipboardData.getData('text/plain');
+
+    const pastedText = e.clipboardData.getData("text/plain");
     if (pastedText) {
       setUrl(pastedText);
       processMediaUrl(pastedText);
     }
   };
 
+  // Fungsi untuk memproses URL media
   const processMediaUrl = (url: string) => {
     if (!url) return;
 
     if (url.includes("youtube.com") || url.includes("youtu.be")) {
       const videoId = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
-      setMedia(`https://www.youtube.com/embed/${videoId}`);
+      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      onMediaChange(embedUrl);
     } else {
-      setMedia(url);
+      onMediaChange(url);
     }
     setScale(1);
     setPosition({ x: 0, y: 0 });
@@ -116,16 +130,16 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (media) {
       isDragging.current = true;
-      
+
       const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
       const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-      
+
       startPos.current = {
         x: clientX - position.x,
-        y: clientY - position.y
+        y: clientY - position.y,
       };
-      
-      document.body.style.cursor = 'grabbing';
+
+      document.body.style.cursor = "grabbing";
     }
   };
 
@@ -135,7 +149,7 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
   };
 
   const handleRemoveMedia = () => {
-    setMedia(null);
+    onMediaChange("");
     setUrl("");
     setScale(1);
     setPosition({ x: 0, y: 0 });
@@ -196,10 +210,11 @@ const Split: FC<SplitProps> = ({ onRemoveMedia }) => {
               const input = document.createElement("input");
               input.type = "file";
               input.accept = "image/*";
-              input.onchange = (e) => {
+              input.onchange = async (e) => {
                 const files = (e.target as HTMLInputElement).files;
                 if (files?.[0]) {
-                  setMedia(URL.createObjectURL(files[0]));
+                  const dataUrl = await readFileAsDataURL(files[0]);
+                  onMediaChange(dataUrl);
                 }
               };
               input.click();
