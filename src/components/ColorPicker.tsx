@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from 'react';
-import { XMarkIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronUpIcon, ChevronDownIcon, EyeDropperIcon } from '@heroicons/react/24/outline';
 
 interface ColorPickerProps {
   onClose: () => void;
@@ -64,7 +64,7 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 p-4 bg-white dark:bg-gray-900 rounded-lg shadow-xl w-80 border border-gray-200 dark:border-gray-700 mb-14">
+    <div className="fixed bottom-4 right-4 p-4 bg-white dark:bg-gray-900 rounded-lg shadow-xl w-80 border border-gray-200 dark:border-gray-800 mb-14">
       {/* Header dengan Tombol Kontrol */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold dark:text-gray-100">Color Picker</h3>
@@ -102,9 +102,9 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
             {/* Tombol Pipet (Selalu Tampil) */}
             <button
               onClick={pickColorWithEyedropper}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
             >
-              Pipet
+              <EyeDropperIcon className="h-5 w-5" />
             </button>
           </div>
 
@@ -114,7 +114,7 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
               onColorPick(color);
               addColorToHistory(color);
             }}
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 dark:hover:bg-blue-600 transition-colors"
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
           >
             Pick Color
           </button>
