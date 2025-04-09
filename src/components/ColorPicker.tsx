@@ -11,8 +11,10 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
   const [colorHistory, setColorHistory] = useState<string[]>([]);
   const [showContent, setShowContent] = useState(true);
   const [isEyedropperSupported, setIsEyedropperSupported] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedType, setCopiedType] = useState<'hex' | 'rgb' | 'rgba' | null>(null);
 
-  // Cek apakah browser mendukung EyeDropper API
+  // Check if browser supports EyeDropper API
   useEffect(() => {
     setIsEyedropperSupported('EyeDropper' in window);
   }, []);
@@ -27,8 +29,15 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
     setColorHistory((prev) => prev.filter((color) => color !== colorToRemove));
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, index: number, type: 'hex' | 'rgb' | 'rgba') => {
     navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setCopiedType(type);
+    
+    setTimeout(() => {
+      setCopiedIndex(null);
+      setCopiedType(null);
+    }, 2000);
   };
 
   const hexToRgb = (hex: string) => {
@@ -45,7 +54,6 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
-  // Fungsi untuk menggunakan EyeDropper API
   const pickColorWithEyedropper = async () => {
     if (isEyedropperSupported) {
       try {
@@ -65,7 +73,7 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
 
   return (
     <div className="fixed bottom-4 right-4 p-4 bg-white dark:bg-gray-900 rounded-lg shadow-xl w-80 border border-gray-200 dark:border-gray-800 mb-14">
-      {/* Header dengan Tombol Kontrol */}
+      {/* Header with Control Buttons */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold dark:text-gray-100">Color Picker</h3>
         <div className="flex gap-1">
@@ -88,10 +96,10 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
         </div>
       </div>
 
-      {/* Konten Utama */}
+      {/* Main Content */}
       {showContent && (
         <>
-          {/* Input Color Picker */}
+          {/* Color Picker Input */}
           <div className="flex gap-2 mb-4">
             <input
               type="color"
@@ -99,7 +107,7 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
               onChange={(e) => setColor(e.target.value)}
               className="w-full h-10 cursor-pointer bg-transparent"
             />
-            {/* Tombol Pipet (Selalu Tampil) */}
+            {/* Eye Dropper Button */}
             <button
               onClick={pickColorWithEyedropper}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
@@ -108,7 +116,7 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
             </button>
           </div>
 
-          {/* Tombol Pick Color */}
+          {/* Pick Color Button */}
           <button
             onClick={() => {
               onColorPick(color);
@@ -119,7 +127,7 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
             Pick Color
           </button>
 
-          {/* Riwayat Warna */}
+          {/* Color History */}
           <div className="mt-4">
             <h4 className="text-sm font-medium mb-3 dark:text-gray-200">Color History</h4>
             <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-2">
@@ -144,10 +152,14 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
                         <div className="flex items-center gap-1.5">
                           <span className="truncate dark:text-gray-200">{color}</span>
                           <button
-                            onClick={() => copyToClipboard(color)}
-                            className="px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded hover:opacity-80 transition-opacity"
+                            onClick={() => copyToClipboard(color, i, 'hex')}
+                            className={`px-1.5 py-0.5 text-xs rounded hover:opacity-80 transition-opacity ${
+                              copiedIndex === i && copiedType === 'hex'
+                                ? 'bg-blue-500/50 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700'
+                            }`}
                           >
-                            Copy
+                            {copiedIndex === i && copiedType === 'hex' ? 'Copied!' : 'Copy'}
                           </button>
                         </div>
                       </div>
@@ -157,10 +169,14 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
                         <div className="flex items-center gap-1.5">
                           <span className="truncate dark:text-gray-200">{hexToRgb(color)}</span>
                           <button
-                            onClick={() => copyToClipboard(hexToRgb(color))}
-                            className="px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded hover:opacity-80 transition-opacity"
+                            onClick={() => copyToClipboard(hexToRgb(color), i, 'rgb')}
+                            className={`px-1.5 py-0.5 text-xs rounded hover:opacity-80 transition-opacity ${
+                              copiedIndex === i && copiedType === 'rgb'
+                                ? 'bg-blue-500/50 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700'
+                            }`}
                           >
-                            Copy
+                            {copiedIndex === i && copiedType === 'rgb' ? 'Copied!' : 'Copy'}
                           </button>
                         </div>
                       </div>
@@ -170,10 +186,14 @@ const ColorPicker: FC<ColorPickerProps> = ({ onClose, onColorPick }) => {
                         <div className="flex items-center gap-1.5">
                           <span className="truncate dark:text-gray-200">{hexToRgba(color, 1)}</span>
                           <button
-                            onClick={() => copyToClipboard(hexToRgba(color, 1))}
-                            className="px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded hover:opacity-80 transition-opacity"
+                            onClick={() => copyToClipboard(hexToRgba(color, 1), i, 'rgba')}
+                            className={`px-1.5 py-0.5 text-xs rounded hover:opacity-80 transition-opacity ${
+                              copiedIndex === i && copiedType === 'rgba'
+                                ? 'bg-blue-500/50 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700'
+                            }`}
                           >
-                            Copy
+                            {copiedIndex === i && copiedType === 'rgba' ? 'Copied!' : 'Copy'}
                           </button>
                         </div>
                       </div>
