@@ -21,7 +21,8 @@ interface ControlProps {
   setLayout: (layout: 'grid' | 'rows' | 'columns') => void
   toggleFullscreen: () => void
   resetSplits: () => void
-  createGridLayout: () => void // Tambahkan prop ini
+  createGridLayout: () => void
+  canAddSplit: boolean
 }
 
 const Control: FC<ControlProps> = ({ 
@@ -33,17 +34,22 @@ const Control: FC<ControlProps> = ({
   setLayout,
   toggleFullscreen,
   resetSplits,
-  createGridLayout // Terima prop ini
+  createGridLayout,
+  canAddSplit
 }) => {
   return (
     <nav className="relative flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 shadow-sm">
-      {/* Left Control Group */}
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
         <div className="flex items-center gap-2 pr-4">
           <button 
             onClick={addSplit}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0"
-            title="Add Split"
+            disabled={!canAddSplit}
+            className={`p-2 rounded-lg transition-colors shrink-0 ${
+              canAddSplit 
+                ? "hover:bg-gray-100 dark:hover:bg-gray-800" 
+                : "opacity-50 cursor-not-allowed"
+            }`}
+            title={canAddSplit ? "Add Split" : "Maximum 6 splits per tab"}
           >
             <PlusIcon className="h-5 w-5 text-gray-700 dark:text-gray-300"/>
           </button>
@@ -68,8 +74,8 @@ const Control: FC<ControlProps> = ({
         <div className="flex gap-1 border-l pl-4 border-gray-200 dark:border-gray-800">
           <button
             onClick={() => {
-              setLayout('grid'); // Tetap memanggil setLayout
-              createGridLayout(); // Panggil fungsi createGridLayout
+              setLayout('grid');
+              createGridLayout();
             }}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
             title="Grid Layout"
@@ -101,12 +107,10 @@ const Control: FC<ControlProps> = ({
         </button>
       </div>
 
-      {/* Center Title */}
       <div className="hidden md:block absolute left-1/2 -translate-x-1/2 text-gray-700 dark:text-gray-100 font-bold shrink-0">
         FZLSplits
       </div>
 
-      {/* Right Control Group */}
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={toggleFullscreen}
