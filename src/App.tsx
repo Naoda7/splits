@@ -5,6 +5,7 @@ import Split from "./components/Split";
 import ColorPicker from "./components/ColorPicker";
 import LastActivityModal from "./components/LastActivityModal";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { toggleFullscreen } from "./utils/fullscreen";
 
 interface SplitData {
   id: string;
@@ -184,6 +185,10 @@ const App = () => {
     });
   };
 
+  const handleFullscreen = () => {
+    toggleFullscreen(mainContainerRef.current);
+  };
+
   useEffect(() => {
     if (tabs.length > 0 || isDark) {
       saveActivity();
@@ -266,7 +271,7 @@ const App = () => {
         isDark={isDark}
         openColorPicker={() => setShowColorPicker(true)}
         setLayout={setLayout}
-        toggleFullscreen={() => {}}
+        toggleFullscreen={handleFullscreen}
         resetSplits={resetSplits}
         createGridLayout={createGridLayout}
         canAddSplit={tabs[activeTab]?.splits?.length < 6}
