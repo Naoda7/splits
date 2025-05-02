@@ -421,14 +421,14 @@ const Split: FC<SplitProps> = ({ media, onMediaChange }) => {
                 e.stopPropagation();
                 handleRemoveMedia();
               }}
-              className="p-1 sm:p-1.5 bg-white/70 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white dark:text-gray-500 dark:hover:bg-gray-700 transition-colors"
+              className="p-1 sm:p-1.5 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-sm bg-white/30 hover:bg-white dark:text-gray-500 dark:hover:bg-gray-700 transition-colors"
               title="Remove media"
             >
               <XMarkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
             </button>
           </div>
 
-          <div className="absolute bottom-0.5 right-0.5 sm:bottom-2 sm:right-2 z-20 flex items-center bg-white/70 dark:text-gray-500 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-0.5 sm:p-1 shadow-sm space-x-0.5">
+          <div className="absolute bottom-0.5 right-0.5 sm:bottom-14 sm:right-2 z-20 flex items-center bg-white/30 dark:text-gray-500 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-0.5 sm:p-1 shadow-sm space-x-0.5">
             <button
               onClick={(e) => {
                 e.stopPropagation();
