@@ -11,7 +11,7 @@ const LocalStorageManager = ({ tabs, onLoad }: Props) => {
   useEffect(() => {
     const savedData = loadFromLocalStorage();
     if (savedData) onLoad(savedData);
-  }, []);
+  }, [onLoad]);
 
   useEffect(() => {
     saveToLocalStorage(tabs);
