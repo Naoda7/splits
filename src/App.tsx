@@ -1,94 +1,72 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Control from "./components/Control";
 import Split from "./components/Split";
 import ColorPicker from "./components/ColorPicker";
-import LastActivityModal from "./components/LastActivityModal";
+import LocalStorageManager from "./components/LocalStorageManager";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { toggleFullscreen } from "./utils/fullscreen";
+import { saveToLocalStorage, loadFromLocalStorage, saveThemePreference, loadThemePreference } from "./utils/storage";
 
 interface SplitData {
   id: string;
   media?: string;
 }
 
-interface TabData {
+export interface TabData {
   id: string;
   name: string;
   splits: SplitData[];
 }
 
-interface ActivityData {
-  tabs: TabData[];
-  activeTab: number;
-  isDark: boolean;
-  timestamp: number;
-}
-
 const App = () => {
-  const [tabs, setTabs] = useState<TabData[]>([{
-    id: uuidv4(),
-    name: "Tab 1",
-    splits: [{ id: uuidv4() }]
-  }]);
+  const [tabs, setTabs] = useState<TabData[]>(() => {
+    const savedData = loadFromLocalStorage();
+    return savedData ? savedData.map(tab => ({
+      ...tab,
+      splits: tab.splits.map(split => ({
+        ...split,
+        media: split.media?.startsWith('blob:') ? undefined : split.media
+      }))
+    })) : [{
+      id: uuidv4(),
+      name: "Tab 1",
+      splits: [{ id: uuidv4() }]
+    }];
+  });
+  
   const [activeTab, setActiveTab] = useState(0);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = loadThemePreference();
+    return savedTheme ?? false;
+  });
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [layout, setLayout] = useState<"grid" | "rows" | "columns">("grid");
-  const [showLastActivityModal, setShowLastActivityModal] = useState(false);
   const [editingTab, setEditingTab] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const mainContainerRef = useRef<HTMLDivElement>(null);
 
-  const saveActivity = useCallback(() => {
-    const activity: ActivityData = {
-      tabs,
-      activeTab,
-      isDark,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem("lastActivity", JSON.stringify(activity));
-  }, [tabs, activeTab, isDark]);
-
   useEffect(() => {
-    const lastActivity = localStorage.getItem("lastActivity");
-    if (lastActivity) {
-      const { tabs: savedTabs, activeTab: savedActiveTab, isDark: savedIsDark, timestamp } = JSON.parse(lastActivity) as ActivityData;
-
-      const isDataValid = Array.isArray(savedTabs) && 
-                         typeof savedActiveTab === "number" && 
-                         typeof savedIsDark === "boolean";
-      const isWithin24Hours = Date.now() - timestamp < 24 * 60 * 60 * 1000;
-
-      if (isDataValid && isWithin24Hours) {
-        setShowLastActivityModal(true);
-      } else {
-        localStorage.removeItem("lastActivity");
-      }
+    const savedTheme = loadThemePreference();
+    if (savedTheme !== null) {
+      document.documentElement.classList.toggle("dark", savedTheme);
     }
   }, []);
 
-  const restoreActivity = () => {
-    const lastActivity = localStorage.getItem("lastActivity");
-    if (lastActivity) {
-      const { tabs: savedTabs, activeTab: savedActiveTab, isDark: savedIsDark } = JSON.parse(lastActivity) as ActivityData;
+  useEffect(() => {
+    const hasMedia = tabs.some(tab => 
+      tab.splits.some(split => split.media?.trim())
+    );
 
-      if (Array.isArray(savedTabs)) {
-        setTabs(savedTabs);
-        setActiveTab(savedActiveTab);
-      }
-
-      if (typeof savedIsDark === "boolean") {
-        setIsDark(savedIsDark);
-        document.documentElement.classList.toggle("dark", savedIsDark);
-      }
+    if (hasMedia) {
+      saveToLocalStorage(tabs);
+    } else {
+      localStorage.removeItem("fzl-splits-data");
     }
-    setShowLastActivityModal(false);
-  };
+  }, [tabs]);
 
-  const deleteLastActivity = () => {
-    localStorage.removeItem("lastActivity");
-    setShowLastActivityModal(false); 
+  const handleLoadData = (data: TabData[]) => {
+    setTabs(data);
   };
 
   const addTab = () => {
@@ -100,7 +78,6 @@ const App = () => {
     }];
     setTabs(newTabs);
     setActiveTab(newTabs.length - 1);
-    saveActivity();
   };
 
   const removeTab = (index: number) => {
@@ -108,7 +85,6 @@ const App = () => {
     const newTabs = tabs.filter((_, i) => i !== index);
     setTabs(newTabs);
     setActiveTab(Math.min(activeTab, newTabs.length - 1));
-    saveActivity();
   };
 
   const renameTab = (index: number, newName: string) => {
@@ -116,7 +92,6 @@ const App = () => {
     const newTabs = [...tabs];
     newTabs[index].name = newName.trim();
     setTabs(newTabs);
-    saveActivity();
   };
 
   const handleDoubleClick = (index: number, name: string) => {
@@ -138,21 +113,18 @@ const App = () => {
     const newTabs = [...tabs];
     newTabs[activeTab].splits = [...newTabs[activeTab].splits, { id: uuidv4() }];
     setTabs(newTabs);
-    saveActivity();
   };
 
   const removeSplit = () => {
     const newTabs = [...tabs];
     newTabs[activeTab].splits = newTabs[activeTab].splits.slice(0, -1);
     setTabs(newTabs);
-    saveActivity();
   };
 
   const resetSplits = () => {
     const newTabs = [...tabs];
     newTabs[activeTab].splits = [{ id: uuidv4() }];
     setTabs(newTabs);
-    saveActivity();
   };
 
   const createGridLayout = () => {
@@ -164,7 +136,6 @@ const App = () => {
       { id: uuidv4() },
     ];
     setTabs(newTabs);
-    saveActivity();
     setLayout("grid");
   };
 
@@ -174,13 +145,13 @@ const App = () => {
       split.id === id ? { ...split, media } : split
     );
     setTabs(newTabs);
-    saveActivity();
   };
 
   const toggleDarkMode = () => {
     setIsDark((prev) => {
       const newIsDark = !prev;
       document.documentElement.classList.toggle("dark", newIsDark);
+      saveThemePreference(newIsDark);
       return newIsDark;
     });
   };
@@ -188,12 +159,6 @@ const App = () => {
   const handleFullscreen = () => {
     toggleFullscreen(mainContainerRef.current);
   };
-
-  useEffect(() => {
-    if (tabs.length > 0 || isDark) {
-      saveActivity();
-    }
-  }, [tabs, isDark, saveActivity]);
 
   const getLayoutClass = () => {
     const currentSplits = tabs[activeTab]?.splits || [];
@@ -234,7 +199,7 @@ const App = () => {
               autoFocus
             />
           ) : (
-            <span className="text-sm whitespace-nowrap max-w-[80px] overflow-hidden text-ellipsis">
+            <span className="text-sm whitespace-nowrap max-w-[80px] overflow-hidden text-ellipsis dark:text-gray-400">
               {tab.name}
             </span>
           )}
@@ -264,7 +229,10 @@ const App = () => {
       ref={mainContainerRef}
       className={`h-screen flex flex-col ${isDark ? "dark" : ""} ${isDark ? "bg-black" : "bg-white"}`}
     >
+      <LocalStorageManager tabs={tabs} onLoad={handleLoadData} />
+      
       <Control
+        tabs={tabs}
         addSplit={addSplit}
         removeSplit={removeSplit}
         toggleDarkMode={toggleDarkMode}
@@ -275,6 +243,7 @@ const App = () => {
         resetSplits={resetSplits}
         createGridLayout={createGridLayout}
         canAddSplit={tabs[activeTab]?.splits?.length < 6}
+        canRemoveSplit={tabs[activeTab]?.splits?.length > 1}
       />
 
       <TabBar />
@@ -283,7 +252,6 @@ const App = () => {
         {tabs[activeTab]?.splits?.map((split) => (
           <Split
             key={split.id}
-            onRemoveMedia={removeSplit}
             media={split.media}
             onMediaChange={(media) => updateSplitMedia(split.id, media)}
           />
@@ -296,13 +264,6 @@ const App = () => {
           onColorPick={(color) => console.log("Selected color:", color)}
         />
       )}
-
-      <LastActivityModal
-        isOpen={showLastActivityModal}
-        onClose={() => setShowLastActivityModal(false)}
-        onRestore={restoreActivity}
-        onDelete={deleteLastActivity}
-      />
     </div>
   );
 };

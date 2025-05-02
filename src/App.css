@@ -40,3 +40,11 @@
 .read-the-docs {
   color: #888;
 }
+img {
+  background-color: #f3f4f6; /* Light gray fallback */
+  object-fit: contain;
+}
+
+.dark img {
+  background-color: #1f2937; /* Dark gray fallback */
+}
