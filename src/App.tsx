@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Control from "./components/Control";
 import Split from "./components/Split";
@@ -46,6 +46,16 @@ const App = () => {
   const [editName, setEditName] = useState("");
   const mainContainerRef = useRef<HTMLDivElement>(null);
 
+  const handleLoadData = useCallback((data: TabData[]) => {
+    setTabs(data.map(tab => ({
+      ...tab,
+      splits: tab.splits.map(split => ({
+        ...split,
+        media: split.media?.startsWith('blob:') ? undefined : split.media
+      }))
+    })));
+  }, []);
+
   useEffect(() => {
     const savedTheme = loadThemePreference();
     if (savedTheme !== null) {
@@ -64,10 +74,6 @@ const App = () => {
       localStorage.removeItem("fzl-splits-data");
     }
   }, [tabs]);
-
-  const handleLoadData = (data: TabData[]) => {
-    setTabs(data);
-  };
 
   const addTab = () => {
     if (tabs.length >= 5) return;

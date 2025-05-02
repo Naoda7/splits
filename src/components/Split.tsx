@@ -36,7 +36,6 @@ const Split: FC<SplitProps> = ({ media, onMediaChange }) => {
   };
 
   const checkTransparency = (url: string) => {
-    // Always treat SVG and special image URLs as having transparency
     if (url.toLowerCase().includes('.svg') || 
         url.startsWith('data:image/svg+xml') ||
         /\?q=tbn:|&s$|\/img\?/.test(url)) {
@@ -71,7 +70,6 @@ const Split: FC<SplitProps> = ({ media, onMediaChange }) => {
     img.src = url;
   };
 
-  // Cleanup Blob URLs and check transparency
   useEffect(() => {
     if (media?.startsWith('data:image') || (media && isImageUrl(media))) {
       checkTransparency(media);
@@ -86,12 +84,10 @@ const Split: FC<SplitProps> = ({ media, onMediaChange }) => {
     };
   }, [media]);
 
-  // Reset error state when media changes
   useEffect(() => {
     setIsImageError(false);
   }, [media]);
 
-  // Drag handlers (keep existing implementation)
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging.current || !draggableRef.current) return;
@@ -302,10 +298,22 @@ const Split: FC<SplitProps> = ({ media, onMediaChange }) => {
             />
           </div>
         ) : media.includes("youtube.com") ? (
-          <div className="aspect-video w-full h-full">
+          <div
+            ref={draggableRef}
+            className="aspect-video w-full h-full relative overflow-hidden"
+            style={{
+              transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
+              cursor: isLoading ? "wait" : isDragging.current ? "grabbing" : "grab",
+            }}
+            onMouseDown={handleDragStart}
+            onTouchStart={handleDragStart}
+          >
             <iframe
               src={media}
-              className="w-full h-full rounded-lg"
+              className="w-full h-full rounded-lg absolute inset-0"
+              style={{
+                pointerEvents: isDragging.current ? 'none' : 'auto',
+              }}
               frameBorder="0"
               allowFullScreen
               title="YouTube video"
