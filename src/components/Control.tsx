@@ -16,7 +16,7 @@ import {
   EyeIcon
 } from '@heroicons/react/24/outline';
 import { TabData } from '../App';
-import { loadControlVisibility, saveControlVisibility } from '../utils/storage'; // ⬅️ tambahan
+import { loadControlVisibility, saveControlVisibility } from '../utils/storage';
 
 interface ControlProps {
   tabs: TabData[];
@@ -49,7 +49,7 @@ const Control: FC<ControlProps> = ({
 }) => {
   const [hasData, setHasData] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
-  const [isHidden, setIsHidden] = useState(() => loadControlVisibility()); // ⬅️ load dari localStorage
+  const [isHidden, setIsHidden] = useState(() => loadControlVisibility());
 
   useEffect(() => {
     const mediaExists = tabs.some(tab => 
@@ -178,11 +178,11 @@ const Control: FC<ControlProps> = ({
               }
             </button>
 
-            {/* 🔽 Tombol Hide Control */}
+            {/* Button Hide Control */}
             <button
               onClick={() => {
                 setIsHidden(true);
-                saveControlVisibility(true); // ⬅️ simpan ke localStorage
+                saveControlVisibility(true);
               }}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
               title="Hide Controls"
@@ -193,12 +193,12 @@ const Control: FC<ControlProps> = ({
         </nav>
       )}
 
-      {/* ===== Tombol Show Control Floating (lebih besar + persist) ===== */}
+      {/* ===== Button Show Control Floating ===== */}
       {isHidden && (
         <button
           onClick={() => {
             setIsHidden(false);
-            saveControlVisibility(false); // ⬅️ simpan ke localStorage
+            saveControlVisibility(false);
           }}
           className="fixed bottom-32 right-7 z-[1000] p-4 rounded-xl bg-white/30 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg sm:p-3"
           title="Show Controls"

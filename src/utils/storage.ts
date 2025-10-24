@@ -16,7 +16,7 @@ interface StorageTab {
 }
 
 /* ===============================
-   📦 SPLIT DATA STORAGE
+   SPLIT DATA STORAGE
    =============================== */
 export const saveToLocalStorage = (tabs: TabData[]): void => {
   const tabsToStore = JSON.parse(JSON.stringify(tabs)) as TabData[];
@@ -84,7 +84,7 @@ export const hasMediaInStorage = (): boolean => {
 };
 
 /* ===============================
-   🌙 THEME PREFERENCE STORAGE
+   THEME PREFERENCE STORAGE
    =============================== */
 export const saveThemePreference = (isDark: boolean): void => {
   localStorage.setItem(THEME_KEY, JSON.stringify(isDark));
@@ -96,7 +96,7 @@ export const loadThemePreference = (): boolean | null => {
 };
 
 /* ===============================
-   👁️ CONTROL VISIBILITY STORAGE
+   CONTROL VISIBILITY STORAGE
    =============================== */
 export const saveControlVisibility = (isHidden: boolean): void => {
   localStorage.setItem(CONTROL_VISIBILITY_KEY, JSON.stringify(isHidden));
