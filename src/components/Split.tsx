@@ -291,9 +291,7 @@ const Split: FC<SplitProps> = ({ media, onMediaChange }) => {
             <img
               src={media}
               alt="Uploaded content"
-              className={`w-full h-full object-contain rounded-lg select-none ${
-                hasTransparency ? '' : 'bg-gray-100 dark:bg-gray-800'
-              }`}
+              className="w-full h-full object-contain rounded-lg select-none bg-transparent"
               draggable={false}
             />
           </div>

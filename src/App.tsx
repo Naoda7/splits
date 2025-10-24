@@ -189,7 +189,7 @@ const App = () => {
           className={`flex items-center px-3 py-1 rounded-t-lg cursor-pointer transition-colors ${
             activeTab === index 
               ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white' 
-              : 'hover:bg-gray-50 dark:hover:bg-gray-850 text-gray-500 dark:text-gray-400'
+              : 'hover:bg-gray-100 dark:hover:bg-zinc-600 text-gray-500 dark:text-gray-400'
           }`}
           onClick={() => setActiveTab(index)}
           onDoubleClick={() => handleDoubleClick(index, tab.name)}
