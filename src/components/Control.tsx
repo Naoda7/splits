@@ -11,9 +11,12 @@ import {
   ArrowsPointingOutIcon,
   ArrowPathIcon,
   TrashIcon,
-  XMarkIcon
+  XMarkIcon,
+  EyeSlashIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { TabData } from '../App';
+import { loadControlVisibility, saveControlVisibility } from '../utils/storage'; // ⬅️ tambahan
 
 interface ControlProps {
   tabs: TabData[];
@@ -46,6 +49,7 @@ const Control: FC<ControlProps> = ({
 }) => {
   const [hasData, setHasData] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+  const [isHidden, setIsHidden] = useState(() => loadControlVisibility()); // ⬅️ load dari localStorage
 
   useEffect(() => {
     const mediaExists = tabs.some(tab => 
@@ -61,120 +65,149 @@ const Control: FC<ControlProps> = ({
 
   return (
     <>
-      <nav className="relative flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 shadow-sm">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <div className="flex items-center gap-2 pr-4">
-            <button 
-              onClick={addSplit}
-              disabled={!canAddSplit}
-              className={`p-2 rounded-lg transition-colors ${
-                canAddSplit 
-                  ? "hover:bg-gray-100 dark:hover:bg-gray-800" 
-                  : "opacity-50 cursor-not-allowed"
-              }`}
-              title={canAddSplit ? "Add Split" : "Maximum 6 splits per tab"}
-            >
-              <PlusIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
-            </button>
-            
-            <button
-              onClick={removeSplit}
-              disabled={!canRemoveSplit}
-              className={`p-2 rounded-lg transition-colors ${
-                canRemoveSplit
-                  ? "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  : "opacity-50 cursor-not-allowed"
-              }`}
-              title={canRemoveSplit ? "Remove Split" : "Minimum 1 split required"}
-            >
-              <MinusIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
-            </button>
+      {/* ===== Control Navbar ===== */}
+      {!isHidden && (
+        <nav className="relative flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-2 pr-4">
+              <button 
+                onClick={addSplit}
+                disabled={!canAddSplit}
+                className={`p-2 rounded-lg transition-colors ${
+                  canAddSplit 
+                    ? "hover:bg-gray-100 dark:hover:bg-gray-800" 
+                    : "opacity-50 cursor-not-allowed"
+                }`}
+                title={canAddSplit ? "Add Split" : "Maximum 6 splits per tab"}
+              >
+                <PlusIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+              </button>
+              
+              <button
+                onClick={removeSplit}
+                disabled={!canRemoveSplit}
+                className={`p-2 rounded-lg transition-colors ${
+                  canRemoveSplit
+                    ? "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    : "opacity-50 cursor-not-allowed"
+                }`}
+                title={canRemoveSplit ? "Remove Split" : "Minimum 1 split required"}
+              >
+                <MinusIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+              </button>
+
+              <button
+                onClick={resetSplits}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0"
+                title="Reset Current Tab"
+              >
+                <ArrowPathIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+              </button>
+
+              <button
+                onClick={handleResetAll}
+                className={`p-2 rounded-lg transition-colors shrink-0 ${
+                  hasData
+                    ? 'hover:bg-red-100 dark:hover:bg-red-900 text-red-500 dark:text-red-400'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 cursor-not-allowed'
+                }`}
+                title={hasData ? "Reset All Data" : "No data to reset"}
+                disabled={!hasData}
+              >
+                <TrashIcon className="h-5 w-5"/>
+              </button>
+            </div>
+
+            <div className="flex gap-1 border-l pl-4 border-gray-200 dark:border-gray-800">
+              <button
+                onClick={() => {
+                  setLayout('grid');
+                  createGridLayout();
+                }}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
+                title="Grid Layout"
+              >
+                <Squares2X2Icon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+              </button>
+              <button
+                onClick={() => setLayout('columns')}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
+                title="Column Layout"
+              >
+                <ViewColumnsIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+              </button>
+              <button
+                onClick={() => setLayout('rows')}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
+                title="Row Layout"
+              >
+                <QueueListIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+              </button>
+            </div>
 
             <button
-              onClick={resetSplits}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0"
-              title="Reset Current Tab"
+              onClick={openColorPicker}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0 ml-4"
+              title="Color Picker"
             >
-              <ArrowPathIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
-            </button>
-
-            <button
-              onClick={handleResetAll}
-              className={`p-2 rounded-lg transition-colors shrink-0 ${
-                hasData
-                  ? 'hover:bg-red-100 dark:hover:bg-red-900 text-red-500 dark:text-red-400'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 cursor-not-allowed'
-              }`}
-              title={hasData ? "Reset All Data" : "No data to reset"}
-              disabled={!hasData}
-            >
-              <TrashIcon className="h-5 w-5"/>
+              <SwatchIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
             </button>
           </div>
 
-          <div className="flex gap-1 border-l pl-4 border-gray-200 dark:border-gray-800">
+          <div className="hidden md:block absolute left-1/2 -translate-x-1/2 text-gray-700 dark:text-gray-500 font-bold shrink-0">
+            FZLSplits
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              title="Fullscreen"
+            >
+              <ArrowsPointingOutIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+            </button>
+
+            <button 
+              onClick={toggleDarkMode}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              title="Toggle Theme"
+            >
+              {isDark ? 
+                <SunIcon className="h-5 w-5 text-yellow-400"/> :
+                <MoonIcon className="h-5 w-5 text-gray-700"/>
+              }
+            </button>
+
+            {/* 🔽 Tombol Hide Control */}
             <button
               onClick={() => {
-                setLayout('grid');
-                createGridLayout();
+                setIsHidden(true);
+                saveControlVisibility(true); // ⬅️ simpan ke localStorage
               }}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
-              title="Grid Layout"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+              title="Hide Controls"
             >
-              <Squares2X2Icon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
-            </button>
-            <button
-              onClick={() => setLayout('columns')}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
-              title="Column Layout"
-            >
-              <ViewColumnsIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
-            </button>
-            <button
-              onClick={() => setLayout('rows')}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0"
-              title="Row Layout"
-            >
-              <QueueListIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
+              <EyeSlashIcon className="h-5 w-5 text-gray-700 dark:text-gray-500" />
             </button>
           </div>
+        </nav>
+      )}
 
-          <button
-            onClick={openColorPicker}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0 ml-4"
-            title="Color Picker"
-          >
-            <SwatchIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
-          </button>
-        </div>
+      {/* ===== Tombol Show Control Floating (lebih besar + persist) ===== */}
+      {isHidden && (
+        <button
+          onClick={() => {
+            setIsHidden(false);
+            saveControlVisibility(false); // ⬅️ simpan ke localStorage
+          }}
+          className="fixed bottom-32 right-7 z-[1000] p-4 rounded-xl bg-white/30 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg sm:p-3"
+          title="Show Controls"
+        >
+          <EyeIcon className="h-7 w-7 text-gray-700 dark:text-gray-200 p-1"/>
+        </button>
+      )}
 
-        <div className="hidden md:block absolute left-1/2 -translate-x-1/2 text-gray-700 dark:text-gray-500 font-bold shrink-0">
-          FZLSplits
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={toggleFullscreen}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-            title="Fullscreen"
-          >
-            <ArrowsPointingOutIcon className="h-5 w-5 text-gray-700 dark:text-gray-500"/>
-          </button>
-
-          <button 
-            onClick={toggleDarkMode}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-            title="Toggle Theme"
-          >
-            {isDark ? 
-              <SunIcon className="h-5 w-5 text-yellow-400"/> :
-              <MoonIcon className="h-5 w-5 text-gray-700"/>
-            }
-          </button>
-        </div>
-      </nav>
-
-      {/* Reset Confirmation Popup - Perfectly Centered */}
+      {/* ===== Reset Confirmation Popup ===== */}
       {showResetConfirmation && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div 

@@ -2,6 +2,7 @@ import { TabData } from "../App";
 
 const STORAGE_KEY = "fzl-splits-data";
 const THEME_KEY = "fzl-theme-preference";
+const CONTROL_VISIBILITY_KEY = "fzl-control-hidden"; // 🔥 baru ditambahkan
 
 interface StorageSplit {
   id: string;
@@ -14,7 +15,9 @@ interface StorageTab {
   splits: StorageSplit[];
 }
 
-// For saving/loading splits data
+/* ===============================
+   📦 SPLIT DATA STORAGE
+   =============================== */
 export const saveToLocalStorage = (tabs: TabData[]): void => {
   const tabsToStore = JSON.parse(JSON.stringify(tabs)) as TabData[];
   
@@ -23,9 +26,11 @@ export const saveToLocalStorage = (tabs: TabData[]): void => {
       ...tab,
       splits: tab.splits.filter((split: StorageSplit) => {
         if (!split.media) return false;
-        return split.media.startsWith('data:image') || 
-               split.media.startsWith('http') || 
-               split.media.startsWith('https');
+        return (
+          split.media.startsWith("data:image") ||
+          split.media.startsWith("http") ||
+          split.media.startsWith("https")
+        );
       })
     }))
     .filter(tab => tab.splits.length > 0);
@@ -56,27 +61,31 @@ export const loadFromLocalStorage = (): TabData[] | null => {
 function isValidTabData(data: unknown): data is StorageTab[] {
   if (!Array.isArray(data)) return false;
   return data.every((tab: StorageTab) => 
-    typeof tab?.id === 'string' &&
-    typeof tab?.name === 'string' &&
+    typeof tab?.id === "string" &&
+    typeof tab?.name === "string" &&
     Array.isArray(tab?.splits) &&
     tab.splits.every((split: StorageSplit) => 
-      typeof split?.id === 'string' &&
-      (split.media === undefined || typeof split.media === 'string')
+      typeof split?.id === "string" &&
+      (split.media === undefined || typeof split.media === "string")
     )
   );
 }
 
 export const hasMediaInStorage = (): boolean => {
   const data = loadFromLocalStorage();
-  return data?.some((tab: StorageTab) => 
-    tab.splits.some((split: StorageSplit) => 
-      split.media?.startsWith('data:image') || 
-      split.media?.startsWith('http')
-    )
-  ) ?? false;
+  return (
+    data?.some((tab: StorageTab) =>
+      tab.splits.some((split: StorageSplit) =>
+        split.media?.startsWith("data:image") ||
+        split.media?.startsWith("http")
+      )
+    ) ?? false
+  );
 };
 
-// For theme preference
+/* ===============================
+   🌙 THEME PREFERENCE STORAGE
+   =============================== */
 export const saveThemePreference = (isDark: boolean): void => {
   localStorage.setItem(THEME_KEY, JSON.stringify(isDark));
 };
@@ -84,4 +93,16 @@ export const saveThemePreference = (isDark: boolean): void => {
 export const loadThemePreference = (): boolean | null => {
   const saved = localStorage.getItem(THEME_KEY);
   return saved ? JSON.parse(saved) : null;
+};
+
+/* ===============================
+   👁️ CONTROL VISIBILITY STORAGE
+   =============================== */
+export const saveControlVisibility = (isHidden: boolean): void => {
+  localStorage.setItem(CONTROL_VISIBILITY_KEY, JSON.stringify(isHidden));
+};
+
+export const loadControlVisibility = (): boolean => {
+  const saved = localStorage.getItem(CONTROL_VISIBILITY_KEY);
+  return saved ? JSON.parse(saved) : false;
 };
